@@ -27,8 +27,8 @@ module Propono
       if name.end_with?('.fifo')
         attributes = attributes.merge(
           {
-            'FifoTopic' => true,
-            'ContentBasedDeduplication' => true
+            'FifoTopic' => 'true',
+            'ContentBasedDeduplication' => 'true'
           }
         )
       end
