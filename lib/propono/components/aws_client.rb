@@ -4,6 +4,7 @@ require 'aws-sdk-sqs'
 module Propono
   class AwsClient
     attr_reader :aws_config
+
     def initialize(aws_config)
       @aws_config = aws_config
     end
@@ -22,13 +23,22 @@ module Propono
       )
     end
 
-    def create_topic(name)
-      Topic.new(sns_client.create_topic(name: name))
+    def create_topic(name, attributes = {})
+      if name.end_with?('.fifo')
+        attributes = attributes.merge(
+          {
+            'FifoTopic' => true,
+            'ContentBasedDeduplication' => true
+          }
+        )
+      end
+
+      Topic.new(sns_client.create_topic(name: name, attributes: attributes))
     end
 
     def create_queue(name)
       url = sqs_client.create_queue(queue_name: name).queue_url
-      attributes = sqs_client.get_queue_attributes(queue_url: url, attribute_names: ["QueueArn"]).attributes
+      attributes = sqs_client.get_queue_attributes(queue_url: url, attribute_names: ['QueueArn']).attributes
       Queue.new(url, attributes)
     end
 
